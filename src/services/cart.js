@@ -17,8 +17,14 @@ async function deleteItem(userCart, name) {
 }
 
 async function removeItem(userCart, index) {
+    const deleteIndex = index - 1
 
+    if(index >= 0 && index < userCart.length){
+        userCart.splice(deleteIndex, 1)
+    }
 }
+
+// TODO: adiconar addItem
 
 async function displayCart(userCart) {
     console.log("Shopee cart list: ");
@@ -26,6 +32,7 @@ async function displayCart(userCart) {
         console.log(`${index + 1} | ${item.name} | R$ ${item.price} | ${item.quantity}X | Subtotal: R$ ${item.subtotal()}`);
     });
 }
+
 
 export {
     addItem,
