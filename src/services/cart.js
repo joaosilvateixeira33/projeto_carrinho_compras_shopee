@@ -8,11 +8,33 @@ async function addItem(userCart, item) {
     }
 }
 
-async function calculateTotal(userCart) {
-    console.log("\n");
+async function calculateTotal(userCart, couponCode = "") {
+    console.log("\n=== RESUMO DO PEDIDO SHOPEE ===");
 
-    const result = userCart.reduce((total, item) => total + item.subtotal(), 0)
-    console.log(`Total a pagar: R$ ${result.toFixed(2)}`);
+    const totalBruto = userCart.reduce((total, item) => total + item.subtotal(), 0);
+    
+    const coupons = {
+        "SHOPEE10": 0.10, 
+        "SHOPEE20": 0.20 
+    };
+
+    let desconto = 0;
+    const cupaoFormatado = couponCode.toUpperCase();
+
+    if (coupons[cupaoFormatado]) {
+        desconto = totalBruto * coupons[cupaoFormatado];
+    } else if (couponCode !== "") {
+        console.log(`❌ Cupão "${couponCode}" não encontrado.`);
+    }
+
+    const totalComDesconto = totalBruto - desconto;
+
+    console.log(`Total Bruto:        R$ ${totalBruto.toFixed(2)}`);
+    console.log(`Desconto aplicado:  R$ ${desconto.toFixed(2)}`);
+    console.log(`------------------------------`);
+    console.log(`TOTAL A PAGAR:      R$ ${totalComDesconto.toFixed(2)}`);
+
+    return totalComDesconto;
 }
 
 async function deleteItem(userCart, name) {
@@ -35,8 +57,29 @@ async function removeItem(userCart, item) {
     } else {
         userCart.splice(indexFound, 1);
     }
+}
 
-    await calculateTotal(userCart);
+async function applyCoupon(totalValue, couponCode) {
+    const coupons = {
+        "FRETEFREE": { type: "fixed", value: 5.00, minPrice: 20.00 },
+        "SHOPEE10": { type: "percentage", value: 0.10, minPrice: 0.00 }
+    };
+
+    const coupon = coupons[couponCode.toUpperCase()];
+
+    if (!coupon) {
+        console.log("Cupom inválido.");
+        return totalValue;
+    }
+
+    if (totalValue < coupon.minPrice) {
+        return totalValue;
+    }
+
+    let discount = coupon.type === "percentage" ? totalValue * coupon.value : coupon.value;
+    const finalTotal = Math.max(0, totalValue - discount);
+    
+    return finalTotal;
 }
 
 async function displayCart(userCart) {
@@ -52,5 +95,6 @@ export {
     calculateTotal,
     deleteItem,
     removeItem,
-    displayCart
+    displayCart,
+    applyCoupon
 }
