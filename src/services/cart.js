@@ -1,12 +1,18 @@
 async function addItem(userCart, item) {
-    userCart.push(item)
+    const indexFound = userCart.findIndex((p) => p.name === item.name);
+
+    if (indexFound !== -1) {
+        userCart[indexFound].quantity += item.quantity;
+    } else {
+        userCart.push(item);
+    }
 }
 
 async function calculateTotal(userCart) {
-    console.log("\nShopee cart total: ");
+    console.log("\n");
 
     const result = userCart.reduce((total, item) => total + item.subtotal(), 0)
-    console.log(`Total: R$ ${result}`)
+    console.log(`Total a pagar: R$ ${result.toFixed(2)}`);
 }
 
 async function deleteItem(userCart, name) {
@@ -17,27 +23,21 @@ async function deleteItem(userCart, name) {
 }
 
 async function removeItem(userCart, item) {
-    const indexFound =  userCart.findIndex((p) => p.name === item.name)
+    const indexFound = userCart.findIndex((p) => p.name === item.name);
 
-    if(indexFound === -1){
-        console.log("Item não encontrado");
-        return
+    if (indexFound === -1) {
+        console.log("Erro: Item não encontrado no carrinho.");
+        return;
     }
 
-    if(userCart[indexFound].quantity > 1){
-        userCart[indexFound].quantity -= 1
-        return
+    if (userCart[indexFound].quantity > 1) {
+        userCart[indexFound].quantity -= 1;
+    } else {
+        userCart.splice(indexFound, 1);
     }
 
-    if(userCart[indexFound].quantity == 1){
-        userCart.splice(indexFound, 1)
-        return
-    }
-
-    // TODO: atualizar o total ao remover item
+    await calculateTotal(userCart);
 }
-
-// TODO: adiconar addItem
 
 async function displayCart(userCart) {
     console.log("Shopee cart list: ");
